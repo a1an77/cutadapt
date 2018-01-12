@@ -145,10 +145,6 @@ class Pipeline(object):
 			raise ValueError('discard_trimmed, discard_untrimmed and outfiles.untrimmed must not '
 				'be set simultaneously')
 
-		# TODO: check where to put it to catch only trimmed
-		if outfiles.cutoffs:
-			self._filters.append(CutoffsFileWriter(outfiles.cutoffs))
-
 		if outfiles.demultiplex:
 			self._demultiplexer = self._create_demultiplexer(outfiles)
 			self._filters.append(self._demultiplexer)
@@ -163,6 +159,11 @@ class Pipeline(object):
 			elif outfiles.untrimmed:
 				untrimmed_writer = self._open_writer(outfiles.untrimmed, outfiles.untrimmed2)
 				self._filters.append(filter_wrapper(untrimmed_writer, DiscardUntrimmedFilter()))
+
+			# cutoff filter to catch only unfiltered reads
+			if outfiles.cutoffs:
+				self._filters.append(CutoffsFileWriter(outfiles.cutoffs))
+
 			self._filters.append(self._final_filter(outfiles))
 
 	def close(self):
