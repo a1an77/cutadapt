@@ -11,7 +11,7 @@ from .adapters import BACK, FRONT, PREFIX, SUFFIX, ANYWHERE, LINKED
 from .modifiers import QualityTrimmer, AdapterCutter
 from .filters import (NoFilter, PairedNoFilter, TooShortReadFilter, TooLongReadFilter,
 	DiscardTrimmedFilter, DiscardUntrimmedFilter, PairedEndDemultiplexer, Demultiplexer,
-	NContentFilter, InfoFileWriter, WildcardFileWriter, RestFileWriter)
+	NContentFilter, InfoFileWriter, WildcardFileWriter, RestFileWriter, CutoffsFileWriter)
 
 
 def safe_divide(numerator, denominator):
@@ -91,7 +91,7 @@ class Statistics:
 
 		# Collect statistics from writers/filters
 		for w in writers:
-			if isinstance(w, (InfoFileWriter, RestFileWriter, WildcardFileWriter)):
+			if isinstance(w, (InfoFileWriter, CutoffsFileWriter, RestFileWriter, WildcardFileWriter)):
 				pass
 			elif isinstance(w, (NoFilter, PairedNoFilter, PairedEndDemultiplexer, Demultiplexer)) or \
 					isinstance(w.filter, (DiscardTrimmedFilter, DiscardUntrimmedFilter)):

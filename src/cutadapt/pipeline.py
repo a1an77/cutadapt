@@ -17,7 +17,8 @@ from .modifiers import ZeroCapper
 from .report import Statistics
 from .filters import (Redirector, PairedRedirector, NoFilter, PairedNoFilter, InfoFileWriter,
 	RestFileWriter, WildcardFileWriter, TooShortReadFilter, TooLongReadFilter, NContentFilter,
-	DiscardTrimmedFilter, DiscardUntrimmedFilter, Demultiplexer, PairedEndDemultiplexer)
+	DiscardTrimmedFilter, DiscardUntrimmedFilter, Demultiplexer, PairedEndDemultiplexer,
+	CutoffsFileWriter)
 from .seqio import read_chunks_from_file, read_paired_chunks
 
 logger = logging.getLogger()
@@ -33,6 +34,7 @@ class OutputFiles(object):
 	"""
 	# TODO interleaving for the other file pairs (too_short, too_long, untrimmed)?
 	def __init__(self,
+			cutoffs=None,
 			out=None,
 			out2=None,
 			untrimmed=None,
@@ -47,6 +49,7 @@ class OutputFiles(object):
 			demultiplex=False,
 			interleaved=False,
 	):
+		self.cutoffs = cutoffs
 		self.out = out
 		self.out2 = out2
 		self.untrimmed = untrimmed
@@ -62,6 +65,7 @@ class OutputFiles(object):
 		self.interleaved = interleaved
 
 	def __iter__(self):
+		yield self.cutoffs
 		yield self.out
 		yield self.out2
 		yield self.untrimmed
@@ -140,6 +144,10 @@ class Pipeline(object):
 		if int(discard_trimmed) + int(discard_untrimmed) + int(outfiles.untrimmed is not None) > 1:
 			raise ValueError('discard_trimmed, discard_untrimmed and outfiles.untrimmed must not '
 				'be set simultaneously')
+
+		# TODO: check where to put it to catch only trimmed
+		if outfiles.cutoffs:
+			self._filters.append(CutoffsFileWriter(outfiles.cutoffs))
 
 		if outfiles.demultiplex:
 			self._demultiplexer = self._create_demultiplexer(outfiles)

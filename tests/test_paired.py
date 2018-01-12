@@ -61,6 +61,17 @@ def run_interleaved(params, inpath1, inpath2=None, expected1=None, expected2=Non
 		assert_files_equal(cutpath(expected1), tmp1)
 
 
+def test_cutoffs_file():
+	with temporary_path("cutoffstmp.txt") as cutoffstmp:
+		run_paired(
+			'-g TATTTG -G TATTTG -O 5 --cutoffs-file ' + cutoffstmp,
+			in1='copair.1.fastq', in2='copair.2.fastq',
+			expected1='copair.1.fastq', expected2='copair.2.fastq',
+            cores=1
+		)
+		assert_files_equal(cutpath('copair.cutoffs.txt'), cutoffstmp)
+
+
 def test_paired_separate():
 	"""test separate trimming of paired-end reads"""
 	run('-a TTAGACATAT', 'paired-separate.1.fastq', 'paired.1.fastq')

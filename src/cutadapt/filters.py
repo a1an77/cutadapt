@@ -315,3 +315,44 @@ class InfoFileWriter(object):
 			print(read.name, -1, seq, qualities, sep='\t', file=self.file)
 
 		return KEEP
+
+class CutoffsFileWriter(object):
+	def __init__(self, file):
+		self.file = file
+
+	def __call__(self, read, read2=None):
+		#TODO
+		r = read
+		out=(r.name.split()[0],) # ensure only id is outputted
+
+		# compute cutoffs of the first read using matches (only!)
+		cHead=0
+		cTail=0
+
+		while r.match is not None:
+			m=r.match
+			r=m.read
+			if m.remove_before:
+				cHead+=m.rstop
+			else:
+				cTail+=len(m.read) - m.rstart
+
+		out+= (cHead, cTail)
+
+		cHead=0
+		cTail=0
+		if read2 is not None:
+			r=read2
+			while r.match is not None:
+				m=r.match
+				r=m.read
+				if m.remove_before:
+					cHead+=m.rstop
+				else:
+					cTail+=len(m.read) - m.rstart
+
+		out+= (cHead, cTail)
+
+		print(*out, sep='\t', file=self.file)
+
+		return KEEP

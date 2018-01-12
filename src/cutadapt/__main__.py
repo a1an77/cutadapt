@@ -252,6 +252,9 @@ def get_option_parser():
 	group.add_option("--info-file", metavar="FILE",
 		help="Write information about each read and its adapter matches into FILE. "
 			"See the documentation for the file format.")
+	group.add_option("--cutoffs-file", metavar="FILE",
+		help="Write information about the cutoff performed at each end into FILE. "
+			"File format: tab separated fields: id, fwd head, fwd tail, rev head, rev tail")
 	group.add_option("-r", "--rest-file", metavar="FILE",
 		help="When the adapter matches in the middle of a read, write the "
 			"rest (after the adapter) to FILE.")
@@ -352,13 +355,15 @@ def open_output_files(options, default_outfile, interleaved):
 	Return an OutputFiles instance. If demultiplex is True, the untrimmed, untrimmed2, out and out2
 	attributes are not opened files, but paths (out and out2 with the '{name}' template).
 	"""
-	rest_file = info_file = wildcard = None
+	rest_file = info_file = wildcard = cutoffs_file = None
 	if options.rest_file is not None:
 		rest_file = xopen(options.rest_file, 'w')
 	if options.info_file is not None:
 		info_file = xopen(options.info_file, 'w')
 	if options.wildcard_file is not None:
 		wildcard = xopen(options.wildcard_file, 'w')
+	if options.cutoffs_file is not None:
+		cutoffs_file = xopen(options.cutoffs_file, 'w')
 
 	def open2(path1, path2):
 		file1 = file2 = None
@@ -416,6 +421,7 @@ def open_output_files(options, default_outfile, interleaved):
 	if demultiplex:
 		assert out is not None and '{name}' in out and (out2 is None or '{name}' in out2)
 	return OutputFiles(
+		cutoffs=cutoffs_file,
 		rest=rest_file,
 		info=info_file,
 		wildcard=wildcard,
